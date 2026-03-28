@@ -10,7 +10,7 @@ This project demonstrates production-grade healthcare AI engineering: multi-agen
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Discharge Event                       │
+│                    Discharge Event                      │
 └────────────────────────┬────────────────────────────────┘
                          │
               ┌──────────▼──────────┐
@@ -25,18 +25,18 @@ This project demonstrates production-grade healthcare AI engineering: multi-agen
   └───────────┘  └─────┬──────┘  └────┬─────┘
                        │              │
               ┌────────▼──────────────▼──────┐
-              │     Clinical Narrator (LLM)   │
-              │     Claude claude-sonnet-4-6         │
+              │     Clinical Narrator (LLM)  │
+              │     Claude claude-sonnet-4-6 │
               └──────────────┬───────────────┘
                              │
               ┌──────────────▼───────────────┐
-              │    Workflow Trigger Agent     │
-              │  (Intervention Library)       │
+              │    Workflow Trigger Agent    │
+              │  (Intervention Library)      │
               └──────────────┬───────────────┘
                              │
               ┌──────────────▼───────────────┐
-              │     30-Day Monitoring         │
-              │     Watchlist Agent           │
+              │     30-Day Monitoring        │
+              │     Watchlist Agent          │
               └──────────────────────────────┘
 ```
 
