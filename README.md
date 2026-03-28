@@ -42,6 +42,19 @@ This project demonstrates production-grade healthcare AI engineering: multi-agen
 
 ---
 
+## Dashboard Screenshots
+
+### Home — Risk Distribution & Trends
+![Home Dashboard](screenshots/Home.png)
+
+### Patient Risk Scorer
+![Patient Scorer](screenshots/Patient%20Score.png)
+
+### Model Insights
+![Model Insights](screenshots/Model%20Insights.png)
+
+---
+
 ## Setup
 
 ### 1. Clone and install dependencies
