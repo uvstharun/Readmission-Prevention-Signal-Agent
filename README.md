@@ -71,15 +71,28 @@ cp .env.example .env
 # Edit .env and add your ANTHROPIC_API_KEY
 ```
 
-### 3. Generate synthetic data
+### 3. Data — choose one option
+
+#### Option A: Synthetic Data (no setup required)
 ```bash
 python -m src.data.synthetic_data_generator
-```
-
-### 4. Run feature engineering
-```bash
 python -m src.data.feature_engineering
 ```
+
+#### Option B: MIMIC-IV Real Clinical Data (recommended for production)
+1. Register at https://physionet.org and complete CITI training (~2 hrs)
+2. Apply for MIMIC-IV access: https://physionet.org/content/mimiciv/
+3. Place downloaded `hosp/` CSV files into `data/mimic/hosp/`
+4. Run the MIMIC pipeline:
+```bash
+# Test run with 1,000 patients first
+python -m src.data.mimic.pipeline --max-patients 1000
+
+# Full pipeline (300k+ admissions — takes ~20 mins)
+python -m src.data.mimic.pipeline
+```
+
+> MIMIC-IV files must never be committed to version control — they are excluded in `.gitignore` per PhysioNet Data Use Agreement.
 
 ### 5. Train the model
 ```bash

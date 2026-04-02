@@ -19,6 +19,12 @@ data/synthetic/
 data/processed/
 data/raw/
 
+# MIMIC-IV data files (restricted by PhysioNet DUA — never commit)
+data/mimic/hosp/*.csv
+data/mimic/hosp/*.csv.gz
+data/mimic/icu/*.csv
+data/mimic/icu/*.csv.gz
+
 # Trained models (too large for git)
 models/*.pkl
 models/*.json
