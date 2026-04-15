@@ -62,6 +62,12 @@ NUMERIC_COLS = [
     "high_utilizer_flag", "polypharmacy_flag",
     "high_risk_department_flag", "age_los_interaction",
     "cci_utilization_interaction",
+    # New temporal features
+    "discharge_hour", "discharge_weekend", "discharge_season", "discharge_month",
+    # New clinical features
+    "los_category", "age_group", "diagnosis_diversity",
+    "med_cci_interaction", "care_transition_completeness",
+    "readmission_risk_index",
 ]
 
 
@@ -124,6 +130,65 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     # Interaction features
     df["age_los_interaction"] = df["age"] * df["length_of_stay_days"] / 100
     df["cci_utilization_interaction"] = df["charlson_comorbidity_index"] * df["composite_utilization_score"]
+
+    # --- NEW: Temporal features from discharge_date ---
+    if "discharge_date" in df.columns:
+        discharge_dt = pd.to_datetime(df["discharge_date"], errors="coerce")
+        df["discharge_hour"] = discharge_dt.dt.hour.fillna(12)
+        df["discharge_weekend"] = discharge_dt.dt.dayofweek.isin([5, 6]).astype(int)
+        df["discharge_month"] = discharge_dt.dt.month.fillna(1)
+        df["discharge_season"] = df["discharge_month"].apply(
+            lambda m: 0 if m in [12, 1, 2] else (1 if m in [3, 4, 5] else (2 if m in [6, 7, 8] else 3))
+        )
+    else:
+        df["discharge_hour"] = 12
+        df["discharge_weekend"] = 0
+        df["discharge_month"] = 6
+        df["discharge_season"] = 2
+
+    # --- NEW: LOS category (0=short <3d, 1=medium 3-6d, 2=long 7-13d, 3=very long 14+d) ---
+    df["los_category"] = pd.cut(
+        df["length_of_stay_days"],
+        bins=[-1, 2, 6, 13, 999],
+        labels=[0, 1, 2, 3]
+    ).astype(float).fillna(1)
+
+    # --- NEW: Age group (0=young adult 18-44, 1=middle 45-64, 2=senior 65-79, 3=elderly 80+) ---
+    df["age_group"] = pd.cut(
+        df["age"],
+        bins=[0, 44, 64, 79, 999],
+        labels=[0, 1, 2, 3]
+    ).astype(float).fillna(1)
+
+    # --- NEW: Diagnosis diversity (unique CCSR categories across all diagnoses) ---
+    def count_unique_ccsr(secondary_codes_str):
+        if not secondary_codes_str or str(secondary_codes_str) in ["", "nan"]:
+            return 1
+        codes = str(secondary_codes_str).split("|")
+        categories = set(map_to_ccsr(c) for c in codes if c)
+        return len(categories)
+
+    df["diagnosis_diversity"] = df["secondary_diagnosis_codes"].apply(count_unique_ccsr)
+
+    # --- NEW: Medication-CCI interaction ---
+    df["med_cci_interaction"] = df["num_active_medications"] * df["charlson_comorbidity_index"]
+
+    # --- NEW: Care transition completeness (0-1 scale) ---
+    df["care_transition_completeness"] = (
+        df["followup_appointment_scheduled"]
+        + df["pcp_assigned_flag"]
+        + df["discharge_instructions_given"]
+    ) / 3.0
+
+    # --- NEW: Composite readmission risk index ---
+    df["readmission_risk_index"] = (
+        df["charlson_comorbidity_index"] * 0.25
+        + df["composite_utilization_score"] * 0.20
+        + df["complex_social_risk_score"] * 0.15
+        + df["care_gap_score"] * 0.15
+        + (df["length_of_stay_days"] / 10) * 0.10
+        + df["high_risk_medication_flag"] * 0.15
+    )
 
     return df
 
